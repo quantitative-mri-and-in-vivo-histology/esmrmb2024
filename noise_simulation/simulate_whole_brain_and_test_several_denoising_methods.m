@@ -1,11 +1,49 @@
 function simulate_whole_brain_and_test_several_denoising_methods
 
+% -------------------------------------------------------------------------
+% Script for simulating a whole brain dataset with Added Noise
+%
+% This script performs the following steps:
+% 1. Initializes paths and loads necessary files, such as tensor data, 
+%    brain masks, and B0 volume.
+% 2. Sets up simulation parameters, including signal-to-noise ratios (SNR)
+%    and measurement protocols.
+% 3. Generates synthetic DTI data by adding noise to the signals 
+%    according to specified SNR values.
+% 4. Saves the simulated data in a specified output directory for further
+%    analysis.
+% 5. Creates a graphical representation of the NRMSE for all denoised data
+%    related to noise free data within the mask
+%
+% Instructions:
+% - Ensure that paths to your data files are correctly set.
+% - Adjust simulation parameters (e.g., SNR values, noise samples) as
+%   needed.
+% - Run the script to generate and save simulated DTI data.
+%
+% Prerequisites:
+% - SPM (Statistical Parametric Mapping) software.
+% - ACID toolbox
+%
+% Author: Björn Fricke
+% 
+% Date: 24.06.2024
+%
+% -------------------------------------------------------------------------
+
+
+
+
 clearvars 
     
 path_of_script = fileparts(mfilename('fullpath'));
 
 
 %% Replace filenames with your own paths!
+% In this section, you need to insert your own filenames for the required
+% data files. Ensure that the paths you specify are valid and point to your
+% actual data files. The filenames provided here serve as an example and
+% should be replaced with your corresponding files.
 
 load([path_of_script filesep 'tensoren-input' filesep 'pilot2_bval-bvec.mat']);
 
