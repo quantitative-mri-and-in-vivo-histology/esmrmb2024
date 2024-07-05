@@ -1,4 +1,4 @@
-function acid_noise_simulation_plot_new(path_of_script,SNRlist,mask)
+function acid_noise_simulation_barplot_new(path_of_script,SNRlist,mask)
 
 
 DKI_Variables ={'AD','RD','MW','AW','RW'};
@@ -48,7 +48,7 @@ for i = 1:5
         % data3 = [ path_of_script '/Results_And_Figures/Fit_Results/voxels/' Voxel '/simulated_SNR_' num2str(SNR) '/RBC-module-old/DKI-NLLS/SNR_' num2str(SNR) '_simulation_standard_DKI_001_desc-RBC-DKI-NLLS-' DKI_Variables{i} '_map.nii']; % RBC old
         % data4 = [ path_of_script '/Results_And_Figures/Fit_Results/voxels/' Voxel '/simulated_SNR_' num2str(SNR) '/RBC-module-full/DKI-NLLS/SNR_' num2str(SNR) '_simulation_standard_DKI_001_desc-RBC-DKI-NLLS-' DKI_Variables{i} '_map.nii']; % full new
         % data5 = [ path_of_script '/Results_And_Figures/Fit_Results/voxels/' Voxel '/simulated_SNR_' num2str(SNR) '/RBC-module-koaya/DKI-NLLS/4D_db_desc-DKI-NLLS-' DKI_Variables{i} '_map.nii']; % koaya
-        data0 = [path_of_script filesep 'GT' filesep 'SNR-Inf-4D_desc-DKI-NLLS-' DKI_Variables{i} '_map.nii']; % GT
+        data0 = ['/Users/fricke/Documents/ismrm-2023/GT/derivatives/DKI-NLLS/SNR-Inf-4D_desc-DKI-NLLS-' DKI_Variables{i} '_map.nii']; % GT
         dataX_mspoas = [path_of_script filesep 'Results_and_Figures' filesep 'Fit_Results' filesep 'brain' filesep 'simulated_SNR_' num2str(SNR) filesep 'msPOAS' filesep 'DKI-NLLS' filesep 'SNR_' num2str(SNR) '_simulation_standard_DKI_001_desc-msPOAS-DKI-NLLS-' DKI_Variables{i} '_map.nii']; % no RBC POAS
         dataX__lpca  = [path_of_script filesep 'Results_and_Figures' filesep 'Fit_Results' filesep 'brain' filesep 'simulated_SNR_' num2str(SNR) filesep 'LPCA' filesep 'DKI-NLLS' filesep '4D-raw_desc-LPCA-DKI-NLLS-' DKI_Variables{i} '_map.nii']; % LPCA
         dataX__mppca = [path_of_script filesep 'Results_and_Figures' filesep 'Fit_Results' filesep 'brain' filesep 'simulated_SNR_' num2str(SNR) filesep 'MPPCA' filesep 'DKI-NLLS' filesep '4D-MPPCA_desc-MPPCA-DKI-NLLS-' DKI_Variables{i} '_map.nii']; % MPPCA
@@ -117,6 +117,7 @@ for i = 1:5
         Y_hat_all(:,3) = matrix3(MSK_idx)';
         Y_hat_all(:,4) = matrix4(MSK_idx)';
 
+
             
 
         for p = 1:4
@@ -135,6 +136,11 @@ for i = 1:5
         end
 
         
+        relative_poas_deoising(:,k) = (nrmse_mean(:,1)-nrmse_mean(:,4))./nrmse_mean(:,4);
+        relative_lpca_deoising(:,k) = (nrmse_mean(:,2)-nrmse_mean(:,4))./nrmse_mean(:,4);
+        relative_mppca_deoising(:,k) = (nrmse_mean(:,3)-nrmse_mean(:,4))./nrmse_mean(:,4);
+
+
 
         % mean_complete_1(k) = mean_all(:,1);
         % mean_complete_2(k) = mean_all(:,2);
@@ -168,41 +174,82 @@ for i = 1:5
     end
 
 
-        title([DKI_Variables{i}])
-        % line([(SNRlist(1,1)-5) (SNRlist(1,end)+5)], [y(i) y(i)], 'Color', '#A2142F', 'LineStyle', '--'); hold on;
+        for h = 1:6
+            mean_relative_mppca_deoising(:,h) = mean(relative_mppca_deoising(isfinite(relative_mppca_deoising(:,h)),h).','all',"omitnan")*100;
+            std_relative_mppca_deoising(:,h) = std(relative_mppca_deoising(isfinite(relative_mppca_deoising(:,h)),h).');
+        end
 
+        for h = 1:6
+            mean_relative_poas_deoising(:,h) = mean(relative_poas_deoising(isfinite(relative_poas_deoising(:,h)),h).','all',"omitnan")*100;
+            std_relative_poas_deoising(:,h) = std(relative_poas_deoising(isfinite(relative_poas_deoising(:,h)),h).');
+        end
 
-        plot(SNRlist,nrmse_complete_1,"ro", 'LineStyle', '-','LineWidth',4); hold on; % no RBC POAS
-        plot(SNRlist,nrmse_complete_2,"b*", 'LineStyle', '-','LineWidth',4); hold on; % no RBC LPCA
-        plot(SNRlist,nrmse_complete_3,"g+", 'LineStyle', '-','LineWidth',4); hold on; % no RBC MP-PCA
-        plot(SNRlist,nrmse_complete_4,"k+", 'LineStyle', '-','LineWidth',4); hold on; % no denosing
-        % plot(SNRlist,(y(i) + (y(i)-mean_complete_1)),"ro", 'LineStyle', '-'); hold on;
-        % plot(SNRlist,(y(i) - (y(i)-mean_complete_1)),"ro", 'LineStyle', '-');
-        % plot(SNRlist,mean_complete_2,"g+", 'LineStyle', '--'); hold on;
-        % plot(SNRlist,mean_complete_3,"b*", 'LineStyle', '--'); hold on;
-        % plot(SNRlist,mean_complete_4,"cx", 'LineStyle', '--'); hold on;
-        % plot(SNRlist,mean_complete_5,"m-", 'LineStyle', '--'); hold on;
-        % 
-        legend('msPOAS','LPCA','MPPCA', 'no dneoising')
-
-        xlim([0 110])
-        xticks([5 15 30 39 52 100])
-        % ylim([0 1.1])
-
-        if i == 1
-            ylim([0 0.3])
-        elseif i == 2
-            ylim([0 0.3])
-        elseif i == 3
-            ylim([0 0.7])
-        elseif i == 4
-            ylim([0 1.1])
-        elseif i == 5
-            ylim([0 1.1])
+        for h = 1:6
+            mean_relative_lpca_deoising(:,h) = mean(relative_lpca_deoising(isfinite(relative_lpca_deoising(:,h)),h).','all',"omitnan")*100;
+            std_relative_lpca_deoising(:,h) = std(relative_lpca_deoising(isfinite(relative_lpca_deoising(:,h)),h).');
         end
 
 
 
+        SNRlist = [5,15,30,39,52,100];
+
+        data_barplot    = [mean_relative_poas_deoising(:,1), mean_relative_lpca_deoising(:,1), mean_relative_mppca_deoising(:,1); mean_relative_poas_deoising(:,2), mean_relative_lpca_deoising(:,2), mean_relative_mppca_deoising(:,2);mean_relative_poas_deoising(:,3), mean_relative_lpca_deoising(:,3), mean_relative_mppca_deoising(:,3);mean_relative_poas_deoising(:,4), mean_relative_lpca_deoising(:,4), mean_relative_mppca_deoising(:,4);mean_relative_poas_deoising(:,5), mean_relative_lpca_deoising(:,5), mean_relative_mppca_deoising(:,5);mean_relative_poas_deoising(:,6), mean_relative_lpca_deoising(:,6), mean_relative_mppca_deoising(:,6)];
+
+        b = bar(SNRlist,data_barplot);
+
+        legend('msPOAS','LPCA','MP-PCA')
+
+        b(1).FaceColor = 'r';
+        b(2).FaceColor = 'b';
+        b(3).FaceColor = 'g';
+
+
+        title([DKI_Variables{i}])
+
+
+        xlim([(SNRlist(1,1)-5) (SNRlist(1,end)+5)])
+
+
+
+        % ylim([-70 70])
+        if i == 1
+            ylim([-10 350])
+
+        elseif i == 2
+            ylim([-50 200])
+        elseif i == 3
+            ylim([-40 300])
+        elseif i == 4
+            ylim([-60 80])
+        elseif i == 5
+            ylim([-30 70])
+        end
+
+        xticks([5 15 30 39 52 100])
         xlabel('SNR')
-        ylabel('NRMSE (no unit)')
+        ylabel('Relative difference to no denoising [%]')
+
+
+
+
+        % line([(SNRlist(1,1)-5) (SNRlist(1,end)+5)], [y(i) y(i)], 'Color', '#A2142F', 'LineStyle', '--'); hold on;
+
+
+        % plot(SNRlist,nrmse_complete_1,"ro", 'LineStyle', '-','LineWidth',4); hold on; % no RBC POAS
+        % plot(SNRlist,nrmse_complete_2,"b*", 'LineStyle', '-','LineWidth',4); hold on; % no RBC LPCA
+        % plot(SNRlist,nrmse_complete_3,"g+", 'LineStyle', '-','LineWidth',4); hold on; % no RBC MP-PCA
+        % plot(SNRlist,nrmse_complete_4,"k+", 'LineStyle', '-','LineWidth',4); hold on; % no denosing
+        % % plot(SNRlist,(y(i) + (y(i)-mean_complete_1)),"ro", 'LineStyle', '-'); hold on;
+        % % plot(SNRlist,(y(i) - (y(i)-mean_complete_1)),"ro", 'LineStyle', '-');
+        % % plot(SNRlist,mean_complete_2,"g+", 'LineStyle', '--'); hold on;
+        % % plot(SNRlist,mean_complete_3,"b*", 'LineStyle', '--'); hold on;
+        % % plot(SNRlist,mean_complete_4,"cx", 'LineStyle', '--'); hold on;
+        % % plot(SNRlist,mean_complete_5,"m-", 'LineStyle', '--'); hold on;
+        % 
+        % legend('msPOAS','LPCA','MPPCA', 'no dneoising')
+        % 
+        % xlim([5 110])
+        % ylim([0 1])
+        % xlabel('SNR')
+        % ylabel('NRMSE (no unit)')
 end

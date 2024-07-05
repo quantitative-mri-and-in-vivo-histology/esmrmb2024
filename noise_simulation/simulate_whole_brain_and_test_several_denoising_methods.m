@@ -36,6 +36,7 @@ function simulate_whole_brain_and_test_several_denoising_methods
 
 clearvars 
     
+
 path_of_script = fileparts(mfilename('fullpath'));
 
 
@@ -44,6 +45,8 @@ path_of_script = fileparts(mfilename('fullpath'));
 % data files. Ensure that the paths you specify are valid and point to your
 % actual data files. The filenames provided here serve as an example and
 % should be replaced with your corresponding files.
+
+addpath(genpath(path_of_script))
 
 load([path_of_script filesep 'tensoren-input' filesep 'pilot2_bval-bvec.mat']);
 
@@ -60,7 +63,7 @@ simulated_tensors = read_simulation_tensors([path_of_script filesep 'tensoren-in
 
 % path_of_folder = [fullfile(path_of_script, '..', '..')];
 
-addpath(genpath(path_of_script))
+
 
 simulate_data = 1; 
 
@@ -68,25 +71,22 @@ b0 = acid_read_vols(b0_vol,b0_vol,1);
 
 
 masked_volume = acid_read_vols(masked_volume_tmp,masked_volume_tmp,1);
-% 
-% load([path_of_folder filesep 'files' filesep 'whole_brain_simulation' filesep 'VG.mat'])
-% load([path_of_folder filesep 'files' filesep 'whole_brain_simulation' filesep 'simulation_volume.mat'])
- VG = masked_volume_tmp;
+
+VG = masked_volume_tmp;
 
 
 
 
 [bval_199, bvec_199] = create_199_protocol();
 bvalues_standard_protocol = bval;
-%%
-% pth = ['/projects/crunchie/Malte/AxDKI_Inherent_Bias_Paper/simulation/epilepsy_pilot_subject2/noise_simulation/FIT_DKI_WITHOUT_POAS/'];
 
 
 outdir = [path_of_script '/simulation-output'];
  
 % snrs = [100,52,30,15,5];
 % snrs = [Inf];
-snrs = [5,15,30,39,52,100];
+% snrs = [];
+snrs = [5,15,3039,52,100];
 npool = 8;
 
 simulation_create_directories(outdir, 'brain-simulation', {1}, snrs)
@@ -115,16 +115,13 @@ masks = create_directories_axDKI_inherent_bias_simulation(outdir, snrs, number_o
 
 name_fix = '_whole_brain_pilot2';
 
-
 fit_data = false;
 
-
-
 %% Specify values for simulation
-bval = bval/1000; %already divided the bval values by 1000
+bvalues = bval/1000; %already divided the bval values by 1000
 
 
-[design_matrix_kurtosis_standard_protocol] = design_matrix_standardDKI(bvec,bval(1,:));
+[design_matrix_kurtosis_standard_protocol] = design_matrix_standardDKI(bvec,bvalues(1,:));
 % [design_matrix_kurtosis_fast_199_protocol] = design_matrix_standardDKI(bvec_199,bval_199);
 
 rng('default');
@@ -136,11 +133,11 @@ if simulate_data == 1
     for inx_protocol = 1 : numel(simulation_parameters.measurement_protocol)
         if inx_protocol == 1
             design_matrix_kurtosis = design_matrix_kurtosis_standard_protocol;
-            bvalues = bval;
+            % bvalues = bval;
             bvectors = bvec;
         elseif inx_protocol == 2
             design_matrix_kurtosis = design_matrix_kurtosis_fast_199_protocol;
-            bvalues = bval_199;
+            % bvalues = bval_199;
             bvectors = bvec_199;
         end
 
@@ -228,7 +225,10 @@ if simulate_data == 1
 end
 
 
-brain_folder = {'brain'};
+for u = 1:20
+
+
+brain_folder = {'brain-realization-' num2str(u)};
 
 brain_name   = brain_folder;
 % brain_folder = brain_folder;
@@ -237,6 +237,13 @@ create_directories_results(path_of_script, brain_folder, snrs)
 
 fit_voxels(path_of_script,snrs,brain_folder,npool,bval,bvec)
 
+end
+
+
 % acid_rbc_simulation_plot(path_of_script,snrs,brain_name,1)
  acid_noise_simulation_plot_new(path_of_script,snrs,mask_analysis)
+
+
+ acid_noise_simulation_barplot_new(path_of_script,snrs,mask_analysis)
+
 end
